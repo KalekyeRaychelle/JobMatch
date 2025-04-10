@@ -92,7 +92,7 @@ button:hover {
   flex: 1;
   min-width: 250px;
   padding: 1rem;
-  background-color: #fefce8; /* slightly lighter for inner sections */
+  background-color: #fefce8; 
   border: 2px dashed #facc15;
   border-radius: 0.75rem;
   margin-bottom:6%;
@@ -112,13 +112,13 @@ ul {
 .courses {
   margin-top: 2rem;
   padding: 1rem;
-  background-color: #fef9c3; /* pale yellow for emphasis */
+  background-color: #fef9c3;
   border: 2px dashed #facc15;
   border-radius: 0.75rem;
 }
 
 .courses h3 {
-  color: #a16207; /* yellow-700 */
+  color: #a16207;
   margin-bottom: 0.5rem;
 }
 
