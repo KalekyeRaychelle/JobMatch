@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState,useEffect} from 'react';
 import axios from 'axios';
 import '../styles/Jobs.css';
 
@@ -71,6 +71,21 @@ const Jobs = () => {
       setLoadingFeedback(false); // Done loading
     }
   };
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('feedback');
+      localStorage.removeItem('jobDescription');
+      localStorage.removeItem('cvFileName');
+    
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+  
+    // Clean up the listener when the component unmounts
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
   
 
   return (

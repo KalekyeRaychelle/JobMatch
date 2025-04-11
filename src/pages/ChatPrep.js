@@ -53,9 +53,15 @@ const ChatPrep = () => {
   };
   useEffect(() => {
     const fetchQuestions = async () => {
+      const storedQuestions = localStorage.getItem('chatprep_questions');
+      if (storedQuestions) {
+        setQuestions(JSON.parse(storedQuestions));
+        return; 
+      }
+  
       if (!jobDescription) return;
   
-      setLoadingQuestions(true); 
+      setLoadingQuestions(true);
   
       try {
         const res = await fetch('http://localhost:5000/get-questions', {
@@ -76,6 +82,20 @@ const ChatPrep = () => {
   
     fetchQuestions();
   }, [jobDescription]);
+  
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('chatprep_questions');
+      localStorage.removeItem('chatprep_qaList');
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+  
+    // Clean up the listener when the component unmounts
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
   
  
   
