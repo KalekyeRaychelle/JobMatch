@@ -77,15 +77,7 @@ const ChatPrep = () => {
     fetchQuestions();
   }, [jobDescription]);
   
-  useEffect(() => {
-    const shouldReset = true; 
-    if (shouldReset) {
-      localStorage.removeItem('questions');
-      localStorage.removeItem('qaList');
-      setQuestions([]);
-      setQaList([]);
-    }
-  }, []);
+ 
   
   return (
     <div className='ChatPrep'>

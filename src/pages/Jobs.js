@@ -28,14 +28,6 @@ const Jobs = () => {
     setJobDescription(value);
     localStorage.setItem('jobDescription', value);
   };
-  useEffect(() => {
-    const shouldReset = true;
-    if (shouldReset) {
-      localStorage.removeItem('jobDescription');
-      localStorage.removeItem('cvFileName');
-      localStorage.removeItem('feedback');
-    }
-  }, []);
   
 
   const handleFileChange = (e) => {
