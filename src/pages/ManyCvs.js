@@ -2,9 +2,24 @@ import React, { useState, useEffect } from 'react';
 import '../styles/ManyCvs.css';
 
 const ManyCvs = () => {
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  const handleOptionChange = (e) => {
+    const { value, checked } = e.target;
+  
+    if (value === "all") {
+      setSelectedOptions(checked ? ["all"] : []);
+    } else {
+      const updated = checked
+        ? [...selectedOptions, value].filter(opt => opt !== "all")
+        : selectedOptions.filter(opt => opt !== value);
+  
+      setSelectedOptions(updated);
+    }
+  };
+  
   const [files, setFiles] = useState(() => {
-    const stored = localStorage.getItem('cvFiles');
-    return stored ? JSON.parse(stored) : [];
+      const stored = localStorage.getItem('cvFiles');
+      return stored ? JSON.parse(stored) : [];
   });
   
   const [jobDescription, setJobDescription] = useState(() => {
@@ -93,6 +108,60 @@ const ManyCvs = () => {
             value={jobDescription}
             onChange={handleDescriptionChange}
           />
+        </div>
+        <div className="parameters">
+          <label>Choose parameters:</label>
+          <div className="checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                value="all"
+                checked={selectedOptions.includes("all")}
+                onChange={handleOptionChange}
+              />
+              All
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                value="percentage"
+                checked={selectedOptions.includes("percentage")}
+                onChange={handleOptionChange}
+                disabled={selectedOptions.includes("all")}
+              />
+              Percentage Match
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                value="similarities"
+                checked={selectedOptions.includes("similarities")}
+                onChange={handleOptionChange}
+                disabled={selectedOptions.includes("all")}
+              />
+              Similarities
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                value="missing"
+                checked={selectedOptions.includes("missing")}
+                onChange={handleOptionChange}
+                disabled={selectedOptions.includes("all")}
+              />
+              Missing Skills
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                value="courses"
+                checked={selectedOptions.includes("courses")}
+                onChange={handleOptionChange}
+                disabled={selectedOptions.includes("all")}
+              />
+              Course Recommendations
+            </label>
+          </div>
         </div>
 
         <div className="CV-card">
