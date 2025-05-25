@@ -37,7 +37,6 @@
     max-width: 600px;
     justify-content: space-between;
 }
-    
   .CV-card,
   .description {
     flex: 1;
@@ -57,6 +56,8 @@
   textarea {
     padding: 0.75rem;
     font-size: 1rem;
+    margin-top:2%;
+    margin-bottom:2%;
     border-radius: 0.5rem;
     border: 1px solid #ccc;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -71,12 +72,15 @@
     resize: none;
     border: 1px solid #facc15;
   }
-  
+  .btnSection{
+    margin-top:10%;
+    margin-bottom:2%;}
   button {
     background-color: #f59e0b; 
     color: white;
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
+  
     border: none;
     border-radius: 0.5rem;
     cursor: pointer;
@@ -184,4 +188,19 @@
       transform: translateY(-10px);
     }
   }
-   
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 8px;
+    
+  }
+  .parameters{
+    margin-top:2%;
+    margin-bottom:2%;
+  }
+  .parameters label {
+    font-size:20px;
+    margin-bottom:2px;
+  }
+  
