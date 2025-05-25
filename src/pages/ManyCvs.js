@@ -236,7 +236,7 @@ const ManyCvs = () => {
                     <td>{filename}</td>
                     {error ? (
                       <td colSpan={
-                        1 + // CV Name
+                        1 + 
                         (selectedOptions.includes("percentage") || selectedOptions.includes("all") ? 1 : 0) +
                         (selectedOptions.includes("similarities") || selectedOptions.includes("all") ? 1 : 0) +
                         (selectedOptions.includes("missing") || selectedOptions.includes("all") ? 1 : 0) +
