@@ -142,7 +142,7 @@ Analyze the match between the job description and the CV. Return a JSON object w
             logger.error("No JSON object found in GPT response.")
             raise ValueError("Invalid response format from GPT")
 
-        # Validate course URLs
+       
         valid_courses = []
         for course in feedback.get('course_recommendations', []):
             if is_valid_url(course['url']):
@@ -216,7 +216,6 @@ Only respond with the JSON object.
 
         feedback_raw = response['choices'][0]['message']['content'].strip()
 
-        # Extract JSON from response
         match = re.search(r"\{.*\}", feedback_raw, re.DOTALL)
         if not match:
             logger.error("No JSON object found in GPT response.")
@@ -224,7 +223,7 @@ Only respond with the JSON object.
 
         feedback_full = json.loads(match.group(0))
 
-        # Normalize selected param keys
+        
         key_map = {
             "percentage": "match_percentage",
             "similarities": "similarities",
@@ -233,20 +232,20 @@ Only respond with the JSON object.
             "all": "all"
         }
 
-        # If user requested 'all', return everything
+        
         if "all" in selected_params:
             selected_keys = list(key_map.values())[:-1]  # all except 'all'
         else:
             selected_keys = [key_map[p] for p in selected_params if p in key_map]
 
-        # Filter output
+  
         feedback_filtered = {
             key: feedback_full.get(key)
             for key in selected_keys
             if feedback_full.get(key) is not None
         }
 
-        # Validate course URLs
+     
         if "course_recommendations" in feedback_filtered:
             valid_courses = []
             for course in feedback_filtered["course_recommendations"]:
@@ -309,7 +308,7 @@ def analyze_many_cvs_table_with_params():
         return jsonify({'error': 'Missing data'}), 400
 
     try:
-        selected_params = json.loads(selected_params)  # expect list of strings
+        selected_params = json.loads(selected_params)  
     except Exception as e:
         logger.error(f"Invalid parameters: {e}")
         return jsonify({'error': 'Invalid parameters'}), 400
@@ -321,19 +320,19 @@ def analyze_many_cvs_table_with_params():
             cv_text = extract_text_from_pdf(file)
             feedback = compare_with_gpt_for_many_cvs(job_description, cv_text, selected_params)
 
-            # Build row dynamically based on selected_params
+            
             row = {'cv_name': file.filename}
             for param in selected_params:
                 value = feedback.get(param)
 
-                # Format some known params nicely
+                
                 if param == "percentage":
-                    # normalize key if your GPT returns "match_percentage"
+                   
                     value = f"{value}%" if value is not None else "N/A"
                 elif isinstance(value, list):
                     value = ', '.join(map(str, value))
                 elif isinstance(value, dict):
-                    # for complex objects like course recommendations, maybe format as JSON string or count
+                    
                     value = json.dumps(value)
                 else:
                     value = str(value) if value is not None else "N/A"
