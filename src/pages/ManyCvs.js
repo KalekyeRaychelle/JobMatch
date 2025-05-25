@@ -3,19 +3,30 @@ import '../styles/ManyCvs.css';
 
 const ManyCvs = () => {
   const [selectedOptions, setSelectedOptions] = useState([]);
+
   const handleOptionChange = (e) => {
     const { value, checked } = e.target;
-  
+
     if (value === "all") {
-      setSelectedOptions(checked ? ["all"] : []);
-    } else {
-      const updated = checked
-        ? [...selectedOptions, value].filter(opt => opt !== "all")
-        : selectedOptions.filter(opt => opt !== value);
-  
-      setSelectedOptions(updated);
+        setSelectedOptions(checked ? ["all"] : []);
+        return;
     }
-  };
+
+    let updated = [...selectedOptions].filter(opt => opt !== "all");
+
+    if (checked) {
+        if (updated.length >= 3) {
+          alert("You can only select up to 3 options.");
+          return;
+        }
+        updated.push(value);
+      } else {
+        updated = updated.filter(opt => opt !== value);
+    }
+
+      setSelectedOptions(updated);
+    };
+
   
   const [files, setFiles] = useState(() => {
       const stored = localStorage.getItem('cvFiles');
@@ -54,6 +65,8 @@ const ManyCvs = () => {
   
     const formData = new FormData();
     formData.append('jobDescription', jobDescription);
+    formData.append('selectedOptions', JSON.stringify(selectedOptions)); 
+  
     files.forEach((file) => formData.append('cvs', file));
   
     setLoading(true);
@@ -69,7 +82,7 @@ const ManyCvs = () => {
   
       const result = await response.json();
       setAnalysisResult(result.results);
-      localStorage.setItem('analysisResultMany', JSON.stringify(result.results)); // Save to localStorage
+      localStorage.setItem('analysisResultMany', JSON.stringify(result.results));
     } catch (error) {
       console.error('Error analyzing CVs:', error.message);
       alert('Something went wrong while analyzing CVs.');
@@ -121,43 +134,59 @@ const ManyCvs = () => {
               />
               All
             </label>
+
             <label>
               <input
                 type="checkbox"
                 value="percentage"
                 checked={selectedOptions.includes("percentage")}
                 onChange={handleOptionChange}
-                disabled={selectedOptions.includes("all")}
+                disabled={
+                  selectedOptions.includes("all") || 
+                  (!selectedOptions.includes("percentage") && selectedOptions.length >= 3)
+                }
               />
               Percentage Match
             </label>
+
             <label>
               <input
                 type="checkbox"
                 value="similarities"
                 checked={selectedOptions.includes("similarities")}
                 onChange={handleOptionChange}
-                disabled={selectedOptions.includes("all")}
+                disabled={
+                  selectedOptions.includes("all") || 
+                  (!selectedOptions.includes("similarities") && selectedOptions.length >= 3)
+                }
               />
               Similarities
             </label>
+
             <label>
               <input
                 type="checkbox"
                 value="missing"
                 checked={selectedOptions.includes("missing")}
                 onChange={handleOptionChange}
-                disabled={selectedOptions.includes("all")}
+                disabled={
+                  selectedOptions.includes("all") || 
+                  (!selectedOptions.includes("missing") && selectedOptions.length >= 3)
+                }
               />
               Missing Skills
             </label>
+
             <label>
               <input
                 type="checkbox"
                 value="courses"
                 checked={selectedOptions.includes("courses")}
                 onChange={handleOptionChange}
-                disabled={selectedOptions.includes("all")}
+                disabled={
+                  selectedOptions.includes("all") || 
+                  (!selectedOptions.includes("courses") && selectedOptions.length >= 3)
+                }
               />
               Course Recommendations
             </label>

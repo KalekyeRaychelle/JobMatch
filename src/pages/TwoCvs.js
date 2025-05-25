@@ -2,20 +2,31 @@ import React, { useState, useEffect } from 'react';
 import '../styles/TwoCvs.css';
 
 const TwoCvs = () => {
-   const [selectedOptions, setSelectedOptions] = useState([]);
-    const handleOptionChange = (e) => {
-      const { value, checked } = e.target;
-    
-      if (value === "all") {
-        setSelectedOptions(checked ? ["all"] : []);
-      } else {
-        const updated = checked
-          ? [...selectedOptions, value].filter(opt => opt !== "all")
-          : selectedOptions.filter(opt => opt !== value);
-    
-        setSelectedOptions(updated);
+  const [selectedOptions, setSelectedOptions] = useState([]);
+
+  const handleOptionChange = (e) => {
+    const { value, checked } = e.target;
+  
+    if (value === "all") {
+      setSelectedOptions(checked ? ["all"] : []);
+      return;
+    }
+  
+    let updated = [...selectedOptions].filter(opt => opt !== "all");
+  
+    if (checked) {
+      if (updated.length >= 3) {
+        alert("You can only select up to 3 options.");
+        return;
       }
-    };
+      updated.push(value);
+    } else {
+      updated = updated.filter(opt => opt !== value);
+    }
+  
+    setSelectedOptions(updated);
+  };
+  
   const [description, setDescription] = useState(() => {
     return localStorage.getItem('jobDescriptionTwo') || '';
   });
@@ -55,28 +66,31 @@ const TwoCvs = () => {
     setFiles(updated);
     localStorage.setItem('cvFilesTwo', JSON.stringify(updated.map(f => f ? { name: f.name } : null)));
   };
-
   const handleSubmit = async () => {
     if (!description || files.every(f => !f)) {
       alert('Please enter a job description and upload at least one CV.');
       return;
     }
-
+  
     const formData = new FormData();
     formData.append('jobDescription', description);
+  
+    formData.append('selectedParameters', JSON.stringify(selectedOptions));
+  
+   
     files.forEach(file => {
       if (file) formData.append('cvs', file);
     });
-
+  
     setLoading(true);
     try {
       const response = await fetch('http://localhost:5000/analyzeManyCvs', {
         method: 'POST',
         body: formData
       });
-
+  
       if (!response.ok) throw new Error('Failed to analyze CVs');
-
+  
       const result = await response.json();
       setAnalysisResult(result.results);
       localStorage.setItem('analysisResultTwo', JSON.stringify(result.results));
@@ -87,7 +101,7 @@ const TwoCvs = () => {
       setLoading(false);
     }
   };
-
+  
   const handleDescriptionChange = (e) => {
     setDescription(e.target.value);
     localStorage.setItem('jobDescriptionTwo', e.target.value);
@@ -105,59 +119,76 @@ const TwoCvs = () => {
           />
         </div>
         <div className="parameters">
-          <label>Choose parameters:</label>
-          <div className="checkbox-group">
-            <label>
-              <input
-                type="checkbox"
-                value="all"
-                checked={selectedOptions.includes("all")}
-                onChange={handleOptionChange}
-              />
-              All
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                value="percentage"
-                checked={selectedOptions.includes("percentage")}
-                onChange={handleOptionChange}
-                disabled={selectedOptions.includes("all")}
-              />
-              Percentage Match
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                value="similarities"
-                checked={selectedOptions.includes("similarities")}
-                onChange={handleOptionChange}
-                disabled={selectedOptions.includes("all")}
-              />
-              Similarities
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                value="missing"
-                checked={selectedOptions.includes("missing")}
-                onChange={handleOptionChange}
-                disabled={selectedOptions.includes("all")}
-              />
-              Missing Skills
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                value="courses"
-                checked={selectedOptions.includes("courses")}
-                onChange={handleOptionChange}
-                disabled={selectedOptions.includes("all")}
-              />
-              Course Recommendations
-            </label>
-          </div>
-        </div>
+  <label>Choose parameters:</label>
+  <div className="checkbox-group">
+    <label>
+      <input
+        type="checkbox"
+        value="all"
+        checked={selectedOptions.includes("all")}
+        onChange={handleOptionChange}
+      />
+      All
+    </label>
+
+    <label>
+      <input
+        type="checkbox"
+        value="percentage"
+        checked={selectedOptions.includes("percentage")}
+        onChange={handleOptionChange}
+        disabled={
+          selectedOptions.includes("all") || 
+          (!selectedOptions.includes("percentage") && selectedOptions.length >= 3)
+        }
+      />
+      Percentage Match
+    </label>
+
+    <label>
+      <input
+        type="checkbox"
+        value="similarities"
+        checked={selectedOptions.includes("similarities")}
+        onChange={handleOptionChange}
+        disabled={
+          selectedOptions.includes("all") || 
+          (!selectedOptions.includes("similarities") && selectedOptions.length >= 3)
+        }
+      />
+      Similarities
+    </label>
+
+    <label>
+      <input
+        type="checkbox"
+        value="missing"
+        checked={selectedOptions.includes("missing")}
+        onChange={handleOptionChange}
+        disabled={
+          selectedOptions.includes("all") || 
+          (!selectedOptions.includes("missing") && selectedOptions.length >= 3)
+        }
+      />
+      Missing Skills
+    </label>
+
+    <label>
+      <input
+        type="checkbox"
+        value="courses"
+        checked={selectedOptions.includes("courses")}
+        onChange={handleOptionChange}
+        disabled={
+          selectedOptions.includes("all") || 
+          (!selectedOptions.includes("courses") && selectedOptions.length >= 3)
+        }
+      />
+      Course Recommendations
+    </label>
+  </div>
+   </div>
+
 
         <div className='Cv-container'>
           {files.map((file, index) => (
