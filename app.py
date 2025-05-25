@@ -179,21 +179,111 @@ def analyze():
         logger.error(f"Error during analysis: {e}")
         return jsonify({'error': f"Error during analysis: {str(e)}"}), 500
     
+
+def compare_with_gpt_for_many_cvs(job_description, cv_text, selected_params):
+    try:
+        
+        prompt_string = '''
+- "match_percentage": Number (e.g., 70)
+- "similarities": List of matching skills/qualifications
+- "missing": List of skills/requirements missing from the CV
+- "course_recommendations": A list of objects. Each object should have:
+    - "name": a short course title related to a missing skill
+    - "url": a direct link to one relevant course online
+'''
+
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"""
+Job Description: {job_description}
+
+CV Content: {cv_text}
+
+Analyze the match between the job description and the CV. Return a JSON object with the following keys:
+
+{prompt_string}
+
+Only respond with the JSON object.
+"""}
+        ]
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            max_tokens=600,
+            temperature=0.7
+        )
+
+        feedback_raw = response['choices'][0]['message']['content'].strip()
+
+        # Extract JSON from response
+        match = re.search(r"\{.*\}", feedback_raw, re.DOTALL)
+        if not match:
+            logger.error("No JSON object found in GPT response.")
+            raise ValueError("Invalid response format from GPT")
+
+        feedback_full = json.loads(match.group(0))
+
+        # Normalize selected param keys
+        key_map = {
+            "percentage": "match_percentage",
+            "similarities": "similarities",
+            "missing": "missing",
+            "courses": "course_recommendations",
+            "all": "all"
+        }
+
+        # If user requested 'all', return everything
+        if "all" in selected_params:
+            selected_keys = list(key_map.values())[:-1]  # all except 'all'
+        else:
+            selected_keys = [key_map[p] for p in selected_params if p in key_map]
+
+        # Filter output
+        feedback_filtered = {
+            key: feedback_full.get(key)
+            for key in selected_keys
+            if feedback_full.get(key) is not None
+        }
+
+        # Validate course URLs
+        if "course_recommendations" in feedback_filtered:
+            valid_courses = []
+            for course in feedback_filtered["course_recommendations"]:
+                if is_valid_url(course.get("url", "")):
+                    valid_courses.append(course)
+            feedback_filtered["course_recommendations"] = valid_courses
+
+        return feedback_filtered
+
+    except Exception as e:
+        logger.error(f"Error in GPT-3 API request (many CVs): {e}")
+        raise
+
+
 @app.route('/analyzeManyCvs', methods=['POST'])
 def analyze_many_cvs():
     job_description = request.form.get('jobDescription')
-    files = request.files.getlist('cvs') 
+    selected_params = request.form.get('selectedOptions')
+
+    files = request.files.getlist('cvs')
 
     if not job_description or not files:
         logger.error('Missing data: Job description or CVs not provided')
         return jsonify({'error': 'Missing data'}), 400
+
+    try:
+        selected_params = json.loads(selected_params)
+    except Exception as e:
+        logger.error(f"Invalid parameters: {e}")
+        return jsonify({'error': 'Invalid parameters'}), 400
 
     results = []
 
     for file in files:
         try:
             cv_text = extract_text_from_pdf(file)
-            feedback = compare_with_gpt_for_non_immediate_interview(job_description, cv_text)
+            feedback = compare_with_gpt_for_many_cvs(job_description, cv_text, selected_params) 
             results.append({
                 'filename': file.filename,
                 'feedback': feedback
@@ -207,39 +297,60 @@ def analyze_many_cvs():
 
     return jsonify({'results': results}), 200
 
-@app.route('/analyzeManyCvsTable', methods=['POST'])
-def analyze_many_cvs_table():
+@app.route('/analyzeManyCvsTableWithParams', methods=['POST'])
+def analyze_many_cvs_table_with_params():
     job_description = request.form.get('jobDescription')
+    selected_params = request.form.get('selectedOptions')
+
     files = request.files.getlist('cvs')
 
     if not job_description or not files:
         logger.error('Missing data: Job description or CVs not provided')
         return jsonify({'error': 'Missing data'}), 400
 
+    try:
+        selected_params = json.loads(selected_params)  # expect list of strings
+    except Exception as e:
+        logger.error(f"Invalid parameters: {e}")
+        return jsonify({'error': 'Invalid parameters'}), 400
+
     table_data = []
 
     for file in files:
         try:
             cv_text = extract_text_from_pdf(file)
-            feedback = compare_with_gpt_for_non_immediate_interview(job_description, cv_text)
-            
-            table_data.append({
-                'cv_name': file.filename,
-                'match_percent': f"{feedback.get('match_percentage', 0)}%",
-                'similarity_items': ', '.join(feedback.get('similarities', [])),
-                'missing_items': ', '.join(feedback.get('missing', []))
-            })
+            feedback = compare_with_gpt_for_many_cvs(job_description, cv_text, selected_params)
+
+            # Build row dynamically based on selected_params
+            row = {'cv_name': file.filename}
+            for param in selected_params:
+                value = feedback.get(param)
+
+                # Format some known params nicely
+                if param == "percentage":
+                    # normalize key if your GPT returns "match_percentage"
+                    value = f"{value}%" if value is not None else "N/A"
+                elif isinstance(value, list):
+                    value = ', '.join(map(str, value))
+                elif isinstance(value, dict):
+                    # for complex objects like course recommendations, maybe format as JSON string or count
+                    value = json.dumps(value)
+                else:
+                    value = str(value) if value is not None else "N/A"
+
+                row[param] = value
+
+            table_data.append(row)
+
         except Exception as e:
             logger.error(f"Error processing {file.filename}: {e}")
-            table_data.append({
-                'cv_name': file.filename,
-                'match_percent': 'Error',
-                'similarity_items': '',
-                'missing_items': '',
-                'error': str(e)
-            })
+            row = {'cv_name': file.filename, 'error': str(e)}
+            for param in selected_params:
+                row[param] = 'Error'
+            table_data.append(row)
 
     return jsonify({'table_data': table_data}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
