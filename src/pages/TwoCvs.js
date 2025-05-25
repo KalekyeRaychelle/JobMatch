@@ -216,31 +216,61 @@ const TwoCvs = () => {
           <div className="results">
             <h3>Analysis Summary</h3>
             <div className="table-container">
-              <table className="feedback-table">
-                <thead>
-                  <tr>
-                    <th>CV Name</th>
-                    <th>Match %</th>
-                    <th>Similar Skills</th>
-                    <th>Missing Skills</th>
-                    <th>Recommended Courses</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {analysisResult.map(({ filename, feedback, error }) => (
-                    <tr key={filename}>
-                      <td>{filename}</td>
-                      {error ? (
-                        <td colSpan="4">Error: {error}</td>
-                      ) : (
-                        <>
-                          <td>{feedback.match_percentage}%</td>
-                          <td>{feedback.similarities.length > 0 ? feedback.similarities.join(', ') : 'None'}</td>
-                          <td>{feedback.missing.length > 0 ? feedback.missing.join(', ') : 'None'}</td>
+                        <table className="feedback-table">
+              <thead>
+                <tr>
+                  <th>CV Name</th>
+                  {(selectedOptions.includes("percentage") || selectedOptions.includes("all")) && <th>Match %</th>}
+                  {(selectedOptions.includes("similarities") || selectedOptions.includes("all")) && <th>Similar Skills</th>}
+                  {(selectedOptions.includes("missing") || selectedOptions.includes("all")) && <th>Missing Skills</th>}
+                  {(selectedOptions.includes("courses") || selectedOptions.includes("all")) && <th>Recommended Courses</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {analysisResult.map(({ filename, feedback, error }) => (
+                  <tr key={filename}>
+                    <td>{filename}</td>
+                    {error ? (
+                      <td colSpan={
+                        1 + // CV Name
+                        (selectedOptions.includes("percentage") || selectedOptions.includes("all") ? 1 : 0) +
+                        (selectedOptions.includes("similarities") || selectedOptions.includes("all") ? 1 : 0) +
+                        (selectedOptions.includes("missing") || selectedOptions.includes("all") ? 1 : 0) +
+                        (selectedOptions.includes("courses") || selectedOptions.includes("all") ? 1 : 0)
+                      } style={{ color: 'red' }}>
+                        Error: {error}
+                      </td>
+                    ) : (
+                      <>
+                        {(selectedOptions.includes("percentage") || selectedOptions.includes("all")) && (
                           <td>
-                            {feedback.course_recommendations.length > 0 ? (
+                            {typeof feedback.match_percentage === 'number'
+                              ? `${feedback.match_percentage}%`
+                              : 'N/A'}
+                          </td>
+                        )}
+
+                        {(selectedOptions.includes("similarities") || selectedOptions.includes("all")) && (
+                          <td>
+                            {Array.isArray(feedback.similarities) && feedback.similarities.length > 0
+                              ? feedback.similarities.join(', ')
+                              : 'None'}
+                          </td>
+                        )}
+
+                        {(selectedOptions.includes("missing") || selectedOptions.includes("all")) && (
+                          <td>
+                            {Array.isArray(feedback.missing) && feedback.missing.length > 0
+                              ? feedback.missing.join(', ')
+                              : 'None'}
+                          </td>
+                        )}
+
+                        {(selectedOptions.includes("courses") || selectedOptions.includes("all")) && (
+                          <td>
+                            {Array.isArray(feedback.course_recommendations) && feedback.course_recommendations.length > 0 ? (
                               <ul>
-                                {feedback.course_recommendations.map(course => (
+                                {feedback.course_recommendations.map((course) => (
                                   <li key={course.url}>
                                     <a href={course.url} target="_blank" rel="noopener noreferrer">{course.name}</a>
                                   </li>
@@ -248,12 +278,14 @@ const TwoCvs = () => {
                               </ul>
                             ) : 'None'}
                           </td>
-                        </>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        )}
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
             </div>
           </div>
         )}

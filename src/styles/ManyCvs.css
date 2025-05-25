@@ -154,7 +154,7 @@
   .dot-loader {
     position: relative; 
     left: 60%;  
-    top:-40%;         
+    top:-35%;         
     height: 80px;
     display: flex;
     justify-content: flex-start;
