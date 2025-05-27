@@ -1,9 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/TwoCvs.css';
-
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 const TwoCvs = () => {
   const [selectedOptions, setSelectedOptions] = useState([]);
-
+  const [cutoff, setCutoff] = useState(70); 
+    
+    const handleDownloadMatchingCVs = async () => {
+      if (!analysisResult || analysisResult.length === 0) {
+        alert("No analysis results to filter.");
+        return;
+      }
+    
+      const matchedFiles = files.filter(file => {
+        const result = analysisResult.find(r => r.filename === file.name);
+        return result && result.feedback && result.feedback.match_percentage >= cutoff;
+      });
+    
+      if (matchedFiles.length === 0) {
+        alert("No CVs meet the selected cutoff.");
+        return;
+      }
+    
+      const zip = new JSZip();
+    
+     
+      for (const file of matchedFiles) {
+        const fileData = await file.arrayBuffer();
+        zip.file(file.name, fileData);
+      }
+    
+      
+      const content = await zip.generateAsync({ type: "blob" });
+      saveAs(content, `matched_cvs_cutoff_${cutoff}.zip`);
+    };
   const handleOptionChange = (e) => {
     const { value, checked } = e.target;
   
@@ -216,7 +246,21 @@ const TwoCvs = () => {
           <div className="results">
             <h3>Analysis Summary</h3>
             <div className="table-container">
-                        <table className="feedback-table">
+            <div className="cutoff-section">
+                <label htmlFor="cutoffRange">Set Match Cutoff: {cutoff}%</label>
+                <input
+                  type="range"
+                  id="cutoffRange"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value={cutoff}
+                  onChange={(e) => setCutoff(Number(e.target.value))}
+                />
+                <button onClick={handleDownloadMatchingCVs}>Download Matching CVs</button>
+              </div>
+
+              <table className="feedback-table">
               <thead>
                 <tr>
                   <th>CV Name</th>
@@ -227,63 +271,84 @@ const TwoCvs = () => {
                 </tr>
               </thead>
               <tbody>
-                {analysisResult.map(({ filename, feedback, error }) => (
-                  <tr key={filename}>
-                    <td>{filename}</td>
-                    {error ? (
-                      <td colSpan={
-                        1 + // CV Name
-                        (selectedOptions.includes("percentage") || selectedOptions.includes("all") ? 1 : 0) +
-                        (selectedOptions.includes("similarities") || selectedOptions.includes("all") ? 1 : 0) +
-                        (selectedOptions.includes("missing") || selectedOptions.includes("all") ? 1 : 0) +
-                        (selectedOptions.includes("courses") || selectedOptions.includes("all") ? 1 : 0)
-                      } style={{ color: 'red' }}>
-                        Error: {error}
-                      </td>
-                    ) : (
-                      <>
-                        {(selectedOptions.includes("percentage") || selectedOptions.includes("all")) && (
-                          <td>
-                            {typeof feedback.match_percentage === 'number'
-                              ? `${feedback.match_percentage}%`
-                              : 'N/A'}
-                          </td>
-                        )}
+  {[...analysisResult]
+    .sort((a, b) => {
+      const aMatch = a.feedback?.match_percentage ?? 0;
+      const bMatch = b.feedback?.match_percentage ?? 0;
+      const aPasses = aMatch >= cutoff;
+      const bPasses = bMatch >= cutoff;
 
-                        {(selectedOptions.includes("similarities") || selectedOptions.includes("all")) && (
-                          <td>
-                            {Array.isArray(feedback.similarities) && feedback.similarities.length > 0
-                              ? feedback.similarities.join(', ')
-                              : 'None'}
-                          </td>
-                        )}
+  
+      if (aPasses && !bPasses) return -1;
+      if (!aPasses && bPasses) return 1;
 
-                        {(selectedOptions.includes("missing") || selectedOptions.includes("all")) && (
-                          <td>
-                            {Array.isArray(feedback.missing) && feedback.missing.length > 0
-                              ? feedback.missing.join(', ')
-                              : 'None'}
-                          </td>
-                        )}
+      
+      return bMatch - aMatch;
+    })
+    .map(({ filename, feedback, error }) => (
+      <tr
+        key={filename}
+        className={feedback?.match_percentage >= cutoff ? 'passed-row' : 'failed-row'}
+      >
+        <td>{filename}</td>
+        {error ? (
+          <td
+            colSpan={
+              1 +
+              (selectedOptions.includes("percentage") || selectedOptions.includes("all") ? 1 : 0) +
+              (selectedOptions.includes("similarities") || selectedOptions.includes("all") ? 1 : 0) +
+              (selectedOptions.includes("missing") || selectedOptions.includes("all") ? 1 : 0) +
+              (selectedOptions.includes("courses") || selectedOptions.includes("all") ? 1 : 0)
+            }
+            style={{ color: 'red' }}
+          >
+            Error: {error}
+          </td>
+        ) : (
+          <>
+            {(selectedOptions.includes("percentage") || selectedOptions.includes("all")) && (
+              <td>
+                {typeof feedback.match_percentage === 'number'
+                  ? `${feedback.match_percentage}%`
+                  : 'N/A'}
+              </td>
+            )}
 
-                        {(selectedOptions.includes("courses") || selectedOptions.includes("all")) && (
-                          <td>
-                            {Array.isArray(feedback.course_recommendations) && feedback.course_recommendations.length > 0 ? (
-                              <ul>
-                                {feedback.course_recommendations.map((course) => (
-                                  <li key={course.url}>
-                                    <a href={course.url} target="_blank" rel="noopener noreferrer">{course.name}</a>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : 'None'}
-                          </td>
-                        )}
-                      </>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
+            {(selectedOptions.includes("similarities") || selectedOptions.includes("all")) && (
+              <td>
+                {Array.isArray(feedback.similarities) && feedback.similarities.length > 0
+                  ? feedback.similarities.join(', ')
+                  : 'None'}
+              </td>
+            )}
+
+            {(selectedOptions.includes("missing") || selectedOptions.includes("all")) && (
+              <td>
+                {Array.isArray(feedback.missing) && feedback.missing.length > 0
+                  ? feedback.missing.join(', ')
+                  : 'None'}
+              </td>
+            )}
+
+            {(selectedOptions.includes("courses") || selectedOptions.includes("all")) && (
+              <td>
+                {Array.isArray(feedback.course_recommendations) && feedback.course_recommendations.length > 0 ? (
+                  <ul>
+                    {feedback.course_recommendations.map((course) => (
+                      <li key={course.url}>
+                        <a href={course.url} target="_blank" rel="noopener noreferrer">{course.name}</a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : 'None'}
+              </td>
+            )}
+          </>
+        )}
+      </tr>
+    ))}
+</tbody>
+
             </table>
 
             </div>
