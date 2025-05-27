@@ -8,6 +8,9 @@ import logging
 import json
 import re
 import requests  # Added for URL validation
+import time
+
+
 
 app = Flask(__name__)
 CORS(app)
@@ -181,6 +184,7 @@ def analyze():
     
 
 def compare_with_gpt_for_many_cvs(job_description, cv_text, selected_params):
+    start_time = time.time()
     try:
         
         prompt_string = '''
@@ -258,6 +262,10 @@ Only respond with the JSON object.
     except Exception as e:
         logger.error(f"Error in GPT-3 API request (many CVs): {e}")
         raise
+    finally:
+        end_time = time.time()
+        duration = end_time - start_time
+        logger.info(f"Processed one CV in {duration:.2f} seconds")
 
 
 @app.route('/analyzeManyCvs', methods=['POST'])
@@ -280,6 +288,7 @@ def analyze_many_cvs():
     results = []
 
     for file in files:
+        start_time=time.time()
         try:
             cv_text = extract_text_from_pdf(file)
             feedback = compare_with_gpt_for_many_cvs(job_description, cv_text, selected_params) 
@@ -293,6 +302,10 @@ def analyze_many_cvs():
                 'filename': file.filename,
                 'error': str(e)
             })
+        finally:
+            end_time = time.time()
+            duration = end_time - start_time
+            logger.info(f"[/analyzeManyCvs] {file.filename} processed in {duration:.2f} seconds")
 
     return jsonify({'results': results}), 200
 
@@ -316,6 +329,7 @@ def analyze_many_cvs_table_with_params():
     table_data = []
 
     for file in files:
+        start_time=time.time()
         try:
             cv_text = extract_text_from_pdf(file)
             feedback = compare_with_gpt_for_many_cvs(job_description, cv_text, selected_params)
@@ -347,6 +361,11 @@ def analyze_many_cvs_table_with_params():
             for param in selected_params:
                 row[param] = 'Error'
             table_data.append(row)
+        finally:
+            end_time = time.time()
+            duration = end_time - start_time
+            logger.info(f"[analyzeManyCvsTableWithParams] {file.filename} processed in {duration:.2f} seconds")
+
 
     return jsonify({'table_data': table_data}), 200
 
