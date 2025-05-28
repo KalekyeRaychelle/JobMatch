@@ -7,7 +7,7 @@ import Jobs from "./pages/Jobs";
 import { JobProvider } from "./context/JobContext";
 import PrepHeading from "./components/PrepHeading";
 import ManyCvs from './pages/ManyCvs';
-import TwoCvs from './pages/TwoCvs';
+
 
 function App() {
   const location = useLocation(); 
@@ -16,7 +16,7 @@ function App() {
     <div className="App">
       <Header />
 
-      {(location.pathname === '/' || location.pathname === '/ManyCvs' || location.pathname=== '/TwoCvs') && <Heading />}
+      {(location.pathname === '/' || location.pathname === '/ManyCvs') && <Heading />}
       {location.pathname === '/ChatPrep' && <PrepHeading />}
 
       <JobProvider>
@@ -24,7 +24,7 @@ function App() {
           <Route path="/" element={<Jobs />} />
           <Route path="/ChatPrep" element={<ChatPrep />} />
           <Route path="/ManyCvs" element={<ManyCvs />} />
-          <Route path="/TwoCvs" element={<TwoCvs />} />
+          
         </Routes>
       </JobProvider>
     </div>

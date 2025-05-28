@@ -10,7 +10,7 @@ const Header = () => {
           <li><Link to='/'>Skill Match Analysis</Link></li>
           <li><Link to='/ChatPrep'>Quick Chat Prep</Link></li>
           <li><Link to='/ManyCvs'>Mutiple Cvs Analysis</Link></li>
-          <li><Link to='/TwoCvs'>Two Cvs Analysis</Link></li>
+          
        </ul>
       <h1>JobMatch</h1>
     </header>

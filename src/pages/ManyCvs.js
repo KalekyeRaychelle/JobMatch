@@ -142,7 +142,6 @@ const ManyCvs = () => {
     setJobDescription(value);
     localStorage.setItem('jobDescriptionMany', value);
   };
-  
   return (
     <div className="ManyCvs">
       <div className="jobCards">
@@ -251,8 +250,8 @@ const ManyCvs = () => {
         ) : analysisResult && analysisResult.length > 0 && (
           <div className="results">
             <h3>Analysis Summary</h3>
-            <div className="table-container">
-              <div className="cutoff-section">
+            <div className='output'>
+            <div className="cutoff-section">
                 <label htmlFor="cutoffRange">Set Match Cutoff: {cutoff}%</label>
                 <input
                   type="range"
@@ -265,7 +264,7 @@ const ManyCvs = () => {
                 />
                 <button onClick={handleDownloadMatchingCVs}>Download Matching CVs</button>
               </div>
-
+            <div className="table-container">
               <table className="feedback-table">
               <thead>
                 <tr>
@@ -357,6 +356,7 @@ const ManyCvs = () => {
 
             </table>
 
+            </div>
             </div>
           </div>
         )}
