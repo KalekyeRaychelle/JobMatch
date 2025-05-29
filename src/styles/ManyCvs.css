@@ -196,7 +196,7 @@ ul {
 }
  
 .table-container {
-  margin-top:-22%;
+  margin-top:-33%;
   margin-left:-3%;
   gap:5px;
 }
@@ -234,15 +234,24 @@ ul {
   width: 100%;
 }
 
+.cutoff-number {
+    width: 60px;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom:5%;
+    margin-top:5%;
+    font-size:20px;
+}
+  
+.cutoff-percent {
+    font-weight: bold;
+    margin-left:2%;
+    font-size:20px;
+}
 .paraHeading {
   font-weight: 700;
   letter-spacing: 0.1em;
   font-size: 20px;
   margin-bottom: 0.5rem;
-}
-
-.paraHeading{
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  font-size: 20px;
 }

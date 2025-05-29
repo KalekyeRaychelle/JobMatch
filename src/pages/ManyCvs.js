@@ -251,8 +251,10 @@ const ManyCvs = () => {
           <div className="results">
             <h3>Analysis Summary</h3>
             <div className='output'>
-            <div className="cutoff-section">
-                <label htmlFor="cutoffRange">Set Match Cutoff: {cutoff}%</label>
+            <div className="cutoff-section"> 
+              <label htmlFor="cutoffRange">Set Match Cutoff:</label>
+              
+              <div className="cutoff-control">
                 <input
                   type="range"
                   id="cutoffRange"
@@ -262,8 +264,24 @@ const ManyCvs = () => {
                   value={cutoff}
                   onChange={(e) => setCutoff(Number(e.target.value))}
                 />
-                <button onClick={handleDownloadMatchingCVs}>Download Matching CVs</button>
+                <input
+                  type="number"
+                  className="cutoff-number"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value={cutoff}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (val >= 0 && val <= 100) setCutoff(val);
+                  }}
+                />
+                <span className="cutoff-percent">%</span>
               </div>
+
+              <button onClick={handleDownloadMatchingCVs}>Download Matching CVs</button>
+            </div>
+
             <div className="table-container">
               <table className="feedback-table">
               <thead>
