@@ -15,8 +15,11 @@ const LandingPage = () => {
   useEffect(() => {
     if (role === 'recruiter') {
       navigate('/ManyCvs'); 
+    } else if (role === 'student') {
+      navigate('/SingleCv');
     }
   }, [role, navigate]);
+  
 
   return (
     <div className="LandingPage">
@@ -51,13 +54,6 @@ const LandingPage = () => {
             I’m a Recruiter
           </button>
         </div>
-
-        {role === 'student' && (
-          <div className="studentOptions">
-            <button onClick={() => navigate('/ChatPrep')} className="actionBtn">Quick Chat Prep</button>
-            <button onClick={() => navigate('/SingleCv')} className="actionBtn">Single CV Analysis</button>
-          </div>
-        )}
       </div>
     </div>
   );
