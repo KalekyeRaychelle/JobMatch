@@ -7,8 +7,10 @@ const Header = () => {
     <header className="app-header">
       
         <ul>
+          <li><Link to='/'>Home</Link></li>
           <li><Link to='/SingleCv'>Skill Match Analysis</Link></li>
           <li><Link to='/ChatPrep'>Quick Chat Prep</Link></li>
+
         </ul>
       <h1>JobMatch</h1>
     </header>

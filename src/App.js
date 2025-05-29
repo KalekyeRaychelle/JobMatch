@@ -2,23 +2,29 @@ import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import ChatPrep from "./pages/ChatPrep";
 import Header from "./components/Header";
+import CVheader from './components/CVheader';
 import Heading from './components/Heading';
 import Jobs from "./pages/Jobs";
 import { JobProvider } from "./context/JobContext";
 import PrepHeading from "./components/PrepHeading";
 import ManyCvs from './pages/ManyCvs';
 import LandingPage from './components/LandingPage';
+
 function App() {
   const location = useLocation();
 
-  const showHeader = location.pathname !== '/'; // Hide Header on LandingPage
+  const path = location.pathname;
+
+  const showHeader = path === '/SingleCv' || path === '/ChatPrep';
+  const showCVHeader = path === '/ManyCvs';
 
   return (
     <div className="App">
       {showHeader && <Header />}
-
-      {(location.pathname === '/SingleCv') && <Heading />}
-      {location.pathname === '/ChatPrep' && <PrepHeading />}
+      {showCVHeader && <CVheader />}
+      
+      {(path === '/SingleCv' || path === '/ManyCvs') && <Heading />}
+      {path === '/ChatPrep' && <PrepHeading />}
 
       <JobProvider>
         <Routes>
@@ -31,5 +37,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
