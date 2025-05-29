@@ -7,24 +7,25 @@ import Jobs from "./pages/Jobs";
 import { JobProvider } from "./context/JobContext";
 import PrepHeading from "./components/PrepHeading";
 import ManyCvs from './pages/ManyCvs';
-
-
+import LandingPage from './components/LandingPage';
 function App() {
-  const location = useLocation(); 
+  const location = useLocation();
+
+  const showHeader = location.pathname !== '/'; // Hide Header on LandingPage
 
   return (
     <div className="App">
-      <Header />
+      {showHeader && <Header />}
 
-      {(location.pathname === '/' || location.pathname === '/ManyCvs') && <Heading />}
+      {(location.pathname === '/SingleCv') && <Heading />}
       {location.pathname === '/ChatPrep' && <PrepHeading />}
 
       <JobProvider>
         <Routes>
-          <Route path="/" element={<Jobs />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/ChatPrep" element={<ChatPrep />} />
           <Route path="/ManyCvs" element={<ManyCvs />} />
-          
+          <Route path="/SingleCv" element={<Jobs />} />
         </Routes>
       </JobProvider>
     </div>

@@ -80,7 +80,7 @@ const ManyCvs = () => {
     const handleBeforeUnload = () => {
       localStorage.removeItem('jobDescriptionMany');
       localStorage.removeItem('cvFiles');
-      localStorage.removeItem('analysisResultMany'); // clear stored feedback
+      localStorage.removeItem('analysisResultMany'); 
     };
   
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -154,18 +154,9 @@ const ManyCvs = () => {
           />
         </div>
         <div className="parameters">
-          <label>Choose parameters:</label>
+          <label className="paraHeading">Choose parameters to filter the resumes based on:</label>
           <div className="checkbox-group">
-            <label>
-              <input
-                type="checkbox"
-                value="all"
-                checked={selectedOptions.includes("all")}
-                onChange={handleOptionChange}
-              />
-              All
-            </label>
-
+        
             <label>
               <input
                 type="checkbox"
@@ -191,7 +182,7 @@ const ManyCvs = () => {
                   (!selectedOptions.includes("similarities") && selectedOptions.length >= 3)
                 }
               />
-              Similarities
+              Skill Similarities
             </label>
 
             <label>
@@ -219,7 +210,16 @@ const ManyCvs = () => {
                   (!selectedOptions.includes("courses") && selectedOptions.length >= 3)
                 }
               />
-              Course Recommendations
+              Course Recommendations Based on Missing Skills
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                value="all"
+                checked={selectedOptions.includes("all")}
+                onChange={handleOptionChange}
+              />
+              All Parameters
             </label>
           </div>
         </div>

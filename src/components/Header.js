@@ -7,11 +7,9 @@ const Header = () => {
     <header className="app-header">
       
         <ul>
-          <li><Link to='/'>Skill Match Analysis</Link></li>
+          <li><Link to='/SingleCv'>Skill Match Analysis</Link></li>
           <li><Link to='/ChatPrep'>Quick Chat Prep</Link></li>
-          <li><Link to='/ManyCvs'>Mutiple Cvs Analysis</Link></li>
-          
-       </ul>
+        </ul>
       <h1>JobMatch</h1>
     </header>
     </div>
