@@ -7,13 +7,13 @@ from flask_cors import CORS
 import logging
 import json
 import re
-import requests  # Added for URL validation
+import requests
 import time
 
 
 
-app = Flask(__name__)
-CORS(app)
+application = Flask(__name__)
+CORS(application)
 
 load_dotenv()
 
@@ -30,7 +30,7 @@ def is_valid_url(url):
     except requests.RequestException:
         return False
 
-@app.route('/get-questions', methods=['POST'])
+@application.route('/get-questions', methods=['POST'])
 def generate_questions():
     data = request.json
     job_description = data.get('job_description')
@@ -68,7 +68,7 @@ def generate_questions():
 
     return jsonify({'questions': qa_pairs})
 
-@app.route('/Ask', methods=['POST'])
+@application.route('/Ask', methods=['POST'])
 def Ask():
     try:
         data = request.get_json()
@@ -159,7 +159,7 @@ Analyze the match between the job description and the CV. Return a JSON object w
         logger.error(f"Error in GPT-3 API request: {e}")
         raise
 
-@app.route('/analyze', methods=['POST'])
+@application.route('/analyze', methods=['POST'])
 def analyze():
     job_description = request.form.get('job_description')
     file = request.files.get('cv')
@@ -268,7 +268,7 @@ Only respond with the JSON object.
         logger.info(f"Processed one CV in {duration:.2f} seconds")
 
 
-@app.route('/analyzeManyCvs', methods=['POST'])
+@application.route('/analyzeManyCvs', methods=['POST'])
 def analyze_many_cvs():
     job_description = request.form.get('jobDescription')
     selected_params = request.form.get('selectedOptions')
@@ -309,7 +309,7 @@ def analyze_many_cvs():
 
     return jsonify({'results': results}), 200
 
-@app.route('/analyzeManyCvsTableWithParams', methods=['POST'])
+@application.route('/analyzeManyCvsTableWithParams', methods=['POST'])
 def analyze_many_cvs_table_with_params():
     job_description = request.form.get('jobDescription')
     selected_params = request.form.get('selectedOptions')
@@ -371,4 +371,4 @@ def analyze_many_cvs_table_with_params():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    application.run(debug=True)
