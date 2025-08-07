@@ -1,4 +1,5 @@
 import openai
+from openai import OpenAI
 from flask import Flask, request, jsonify
 import PyPDF2
 import os
@@ -11,13 +12,14 @@ import requests
 import time
 
 
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 application = Flask(__name__)
 CORS(application)
 
 load_dotenv()
 
-openai.api_key = os.getenv('OPENAI_API_KEY')
+
 print("OpenAI Key (partial):", os.getenv("OPENAI_API_KEY")[:8])
 
 logging.basicConfig(
@@ -53,13 +55,14 @@ def generate_questions():
 
     prompt = f"Based on the following job description, generate 10 common interview questions and their answers in the format Q: ... A: ...\n\n{job_description}"
 
-    response = openai.ChatCompletion.create(
-        model='gpt-3.5-turbo',
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
     )
-
-    answer_text = response['choices'][0]['message']['content']
+    answer_text = response.choices[0].message.content
 
     qa_pairs = []
     lines = answer_text.split('\n')
@@ -90,13 +93,15 @@ def Ask():
         if not question:
             return jsonify({"error": "No question provided"}), 400
 
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  
-            messages=[{"role": "user", "content": question}],
-            max_tokens=150
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": question}
+            ]
         )
 
-        answer = response['choices'][0]['message']['content'].strip()
+        answer = response.choices[0].message.content.strip()
         logger.debug(f"Received question: {question}")
         logger.debug(f"OpenAI response: {answer}")
 
@@ -119,54 +124,41 @@ def extract_text_from_pdf(pdf_file):
 
 def compare_with_gpt_for_non_immediate_interview(job_description, cv_text):
     try:
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"""
+        prompt = f"""
 Job Description: {job_description}
 
 CV Content: {cv_text}
 
 Analyze the match between the job description and the CV. Return a JSON object with the following keys:
-
 - "match_percentage": Number (e.g., 70)
 - "similarities": List of matching skills/qualifications
 - "missing": List of skills/requirements missing from the CV
 - "course_recommendations": A list of objects. Each object should have:
     - "name": a short course title related to a missing skill
     - "url": a direct link to one relevant course online 
+"""
 
-{{
-
-}}"""
-    }
-        ]
-
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=messages,
-            max_tokens=500,
-            temperature=0.7
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ]
         )
 
-        feedback_raw = response['choices'][0]['message']['content'].strip()
-
+        feedback_raw = response.choices[0].message.content.strip()
         match = re.search(r"\{.*\}", feedback_raw, re.DOTALL)
-        if match:
-            feedback_clean = match.group(0)
-            feedback = json.loads(feedback_clean)
-        else:
+        if not match:
             logger.error("No JSON object found in GPT response.")
             raise ValueError("Invalid response format from GPT")
 
-       
-        valid_courses = []
-        for course in feedback.get('course_recommendations', []):
-            if is_valid_url(course['url']):
-                valid_courses.append(course)
+        feedback = json.loads(match.group(0))
 
-        feedback['course_recommendations'] = valid_courses
+        feedback['course_recommendations'] = [
+            course for course in feedback.get('course_recommendations', [])
+            if is_valid_url(course['url'])
+        ]
 
-        logger.info(f"Processed feedback: {json.dumps(feedback, indent=2)}")
         return feedback
     except Exception as e:
         logger.error(f"Error in GPT-3 API request: {e}")
@@ -194,12 +186,10 @@ def analyze():
     except Exception as e:
         logger.error(f"Error during analysis: {e}")
         return jsonify({'error': f"Error during analysis: {str(e)}"}), 500
-    
 
 def compare_with_gpt_for_many_cvs(job_description, cv_text, selected_params):
     start_time = time.time()
     try:
-        
         prompt_string = '''
 - "match_percentage": Number (e.g., 70)
 - "similarities": List of matching skills/qualifications
@@ -224,14 +214,14 @@ Only respond with the JSON object.
 """}
         ]
 
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
             max_tokens=600,
             temperature=0.7
         )
 
-        feedback_raw = response['choices'][0]['message']['content'].strip()
+        feedback_raw = response.choices[0].message.content.strip()
 
         match = re.search(r"\{.*\}", feedback_raw, re.DOTALL)
         if not match:
@@ -240,7 +230,6 @@ Only respond with the JSON object.
 
         feedback_full = json.loads(match.group(0))
 
-        
         key_map = {
             "percentage": "match_percentage",
             "similarities": "similarities",
@@ -249,20 +238,17 @@ Only respond with the JSON object.
             "all": "all"
         }
 
-        
         if "all" in selected_params:
             selected_keys = list(key_map.values())[:-1]  # all except 'all'
         else:
             selected_keys = [key_map[p] for p in selected_params if p in key_map]
 
-  
         feedback_filtered = {
             key: feedback_full.get(key)
             for key in selected_keys
             if feedback_full.get(key) is not None
         }
 
-     
         if "course_recommendations" in feedback_filtered:
             valid_courses = []
             for course in feedback_filtered["course_recommendations"]:
