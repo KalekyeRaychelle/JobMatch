@@ -30,6 +30,10 @@ def is_valid_url(url):
         return response.status_code == 200
     except requests.RequestException:
         return False
+    
+@application.route('/')
+def index():
+    return "Backend is running"
 
 @application.route('/get-questions', methods=['POST'])
 def generate_questions():
