@@ -55,7 +55,7 @@ const Jobs = () => {
     setLoadingFeedback(true); 
   
     try {
-      const response = await axios.post('http://localhost:5000/analyze', formData, {
+      const response = await axios.post('https://jobmatch-rizd.onrender.com/analyze', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

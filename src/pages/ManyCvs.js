@@ -103,7 +103,7 @@ const ManyCvs = () => {
   
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/analyzeManyCvs', {
+      const response = await fetch('https://jobmatch-rizd.onrender.com/analyzeManyCvs', {
         method: 'POST',
         body: formData,
       });

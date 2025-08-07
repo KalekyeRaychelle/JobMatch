@@ -24,7 +24,7 @@ const ChatPrep = () => {
     localStorage.setItem('chatprep_qaList', JSON.stringify(updatedQaList));
 
     try {
-      const response = await fetch('http://localhost:5000/Ask', {
+      const response = await fetch('https://jobmatch-rizd.onrender.com/Ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question }),
@@ -64,7 +64,7 @@ const ChatPrep = () => {
       setLoadingQuestions(true);
   
       try {
-        const res = await fetch('http://localhost:5000/get-questions', {
+        const res = await fetch('https://jobmatch-rizd.onrender.com/get-questions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ job_description: jobDescription }),
