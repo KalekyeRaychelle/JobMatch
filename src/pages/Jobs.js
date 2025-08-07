@@ -56,9 +56,9 @@ const Jobs = () => {
   
     try {
       const response = await axios.post('https://jobmatch-rizd.onrender.com/analyze', formData, {
-        headers: {
+        /*headers: {
           'Content-Type': 'multipart/form-data',
-        },
+        },*/
       });
   
       setFeedback(response.data.feedback);
