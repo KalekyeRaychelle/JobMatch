@@ -20,7 +20,15 @@ load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
 print("OpenAI Key (partial):", os.getenv("OPENAI_API_KEY")[:8])
 
-logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
+
 logger = logging.getLogger(__name__)
 
 # URL validation function
