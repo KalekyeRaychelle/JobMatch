@@ -197,6 +197,7 @@ def compare_with_gpt_for_many_cvs(job_description, cv_text, selected_params):
 - "course_recommendations": A list of objects. Each object should have:
     - "name": a short course title related to a missing skill
     - "url": a direct link to one relevant course online
+    - If no course is available, include a "topics_to_cover" field instead with 2–3 topic suggestions
 '''
 
         messages = [
@@ -210,7 +211,7 @@ Analyze the match between the job description and the CV. Return a JSON object w
 
 {prompt_string}
 
-Only respond with the JSON object.
+Only respond with the JSON object. If a course URL is not available for a missing skill, suggest relevant 'topics_to_cover' instead.
 """}
         ]
 
