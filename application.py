@@ -15,7 +15,7 @@ import time
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 application = Flask(__name__)
-CORS(application)
+CORS(application, origins=["https://jobmatch-fe.onrender.com"])
 
 load_dotenv()
 
