@@ -90,38 +90,49 @@ const ManyCvs = () => {
   }, []);
   
   const handleAnalyze = async () => {
-    if (!jobDescription || files.length === 0) {
-      alert('Please provide a job description and at least one CV file.');
-      return;
-    }
-  
-    const formData = new FormData();
-    formData.append('jobDescription', jobDescription);
-    formData.append('selectedOptions', JSON.stringify(selectedOptions)); 
-  
-    files.forEach((file) => formData.append('cvs', file));
-  
-    setLoading(true);
-    try {
+  if (!jobDescription || files.length === 0) {
+    alert('Please provide a job description and at least one CV file.');
+    return;
+  }
+
+  const BATCH_SIZE = 5;
+  const totalResults = [];
+  setLoading(true);
+
+  try {
+    for (let i = 0; i < files.length; i += BATCH_SIZE) {
+      const batch = files.slice(i, i + BATCH_SIZE);
+      const formData = new FormData();
+      formData.append('jobDescription', jobDescription);
+      formData.append('selectedOptions', JSON.stringify(selectedOptions));
+      batch.forEach(file => formData.append('cvs', file));
+
       const response = await fetch('https://jobmatch-rizd.onrender.com/analyzeManyCvs', {
         method: 'POST',
         body: formData,
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to analyze CVs');
+        throw new Error(`Failed to analyze batch starting at index ${i}`);
       }
-  
+
       const result = await response.json();
-      setAnalysisResult(result.results);
-      localStorage.setItem('analysisResultMany', JSON.stringify(result.results));
-    } catch (error) {
-      console.error('Error analyzing CVs:', error.message);
-      alert('Something went wrong while analyzing CVs.');
-    } finally {
-      setLoading(false);
+      if (Array.isArray(result.results)) {
+        totalResults.push(...result.results);
+      }
     }
-  };
+
+    setAnalysisResult(totalResults);
+    localStorage.setItem('analysisResultMany', JSON.stringify(totalResults));
+
+  } catch (error) {
+    console.error('Error analyzing CVs:', error.message);
+    alert('Something went wrong while analyzing the CVs.');
+  } finally {
+    setLoading(false);
+  }
+};
+
   
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files);
