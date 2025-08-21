@@ -65,9 +65,10 @@ const ManyCvs = () => {
       return stored ? JSON.parse(stored) : [];
   });
   
-  const [jobDescription, setJobDescription] = useState(() => {
-    return localStorage.getItem('jobDescriptionMany') || '';
-  });
+ const [jobDescriptionFile, setJobDescriptionFile] = useState(null);
+const [jdFileName, setJdFileName] = useState(() => {
+  return localStorage.getItem('jobDescriptionFileName') || '';
+});
   
   const [analysisResult, setAnalysisResult] = useState(() => {
     const stored = localStorage.getItem('analysisResultMany');
@@ -78,7 +79,7 @@ const ManyCvs = () => {
   
   useEffect(() => {
     const handleBeforeUnload = () => {
-      localStorage.removeItem('jobDescriptionMany');
+      localStorage.removeItem('jobDescriptionFileName');
       localStorage.removeItem('cvFiles');
       localStorage.removeItem('analysisResultMany'); 
     };
@@ -90,8 +91,8 @@ const ManyCvs = () => {
   }, []);
   
   const handleAnalyze = async () => {
-  if (!jobDescription || files.length === 0) {
-    alert('Please provide a job description and at least one CV file.');
+  if (!jobDescriptionFile || files.length === 0) {
+    alert('Please upload a job description file and at least one CV.');
     return;
   }
 
@@ -103,7 +104,7 @@ const ManyCvs = () => {
     for (let i = 0; i < files.length; i += BATCH_SIZE) {
       const batch = files.slice(i, i + BATCH_SIZE);
       const formData = new FormData();
-      formData.append('jobDescription', jobDescription);
+      formData.append('job_description', jobDescriptionFile);
       formData.append('selectedOptions', JSON.stringify(selectedOptions));
       batch.forEach(file => formData.append('cvs', file));
 
@@ -147,32 +148,26 @@ const ManyCvs = () => {
     setFiles(updated);
     localStorage.setItem('cvFiles', JSON.stringify(updated.map(file => ({ name: file.name }))));
   };
-  
-  const handleDescriptionChange = (e) => {
-    const value = e.target.value;
-    setJobDescription(value);
-    localStorage.setItem('jobDescriptionMany', value);
-  };
+
   return (
     <div className="ManyCvs">
       <div className="jobCards">
-        <div className='description'>
-      <label>Upload Job Description (PDF):</label>
-      <input 
-        type="file" 
-        accept=".pdf,.doc,.docx,.txt" 
-        onChange={(e) => {
-          const file = e.target.files[0];
-          if (file) {
-            setJobDescription(file);
-            localStorage.setItem('jobDescriptionFileName', file.name);
-          }
-        }} 
-      />
-      {localStorage.getItem('jobDescriptionFileName') && (
-        <p>Selected JD File: {localStorage.getItem('jobDescriptionFileName')}</p>
-      )}
-    </div>
+       <div className='description'>
+  <label>Upload Job Description (PDF) :</label>
+  <input 
+    type="file" 
+    accept=".pdf,.doc,.docx,.txt" 
+    onChange={(e) => {
+      const file = e.target.files[0];
+      if (file) {
+        setJobDescriptionFile(file);
+        setJdFileName(file.name);
+        localStorage.setItem('jobDescriptionFileName', file.name);
+      }
+    }} 
+  />
+  {jdFileName && <p>Selected JD File: {jdFileName}</p>}
+</div>
         <div className="parameters">
           <label className="paraHeading">Choose parameters to filter the resumes based on:</label>
           <div className="checkbox-group">
