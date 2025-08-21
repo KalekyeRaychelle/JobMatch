@@ -166,18 +166,19 @@ Analyze the match between the job description and the CV. Return a JSON object w
 
 @application.route('/analyze', methods=['POST'])
 def analyze():
-    job_description = request.form.get('job_description')
-    file = request.files.get('cv')
+    jd_file = request.files.get('job_description')
+    cv_file = request.files.get('cv')
 
-    if not job_description or not file:
-        logger.error('Missing data: Job description or CV not provided')
+    if not jd_file or not cv_file:
+        logger.error('Missing data: Job description file or CV not provided')
         return jsonify({'error': 'Missing data'}), 400
 
     try:
-        cv_text = extract_text_from_pdf(file)
+        job_description = extract_text_from_pdf(jd_file)   # extract JD text
+        cv_text = extract_text_from_pdf(cv_file)
     except Exception as e:
-        logger.error(f"Error processing CV: {e}")
-        return jsonify({'error': f"Error processing CV: {str(e)}"}), 500
+        logger.error(f"Error processing files: {e}")
+        return jsonify({'error': f"Error processing files: {str(e)}"}), 500
 
     try:
         feedback = compare_with_gpt_for_non_immediate_interview(job_description, cv_text)
@@ -270,20 +271,19 @@ Only respond with the JSON object. If a course URL is not available for a missin
 
 @application.route('/analyzeManyCvs', methods=['POST'])
 def analyze_many_cvs():
-    job_description = request.form.get('jobDescription')
+    jd_file = request.files.get('job_description')
     selected_params = request.form.get('selectedOptions')
-
     files = request.files.getlist('cvs')
 
-    if not job_description or not files:
-        logger.error('Missing data: Job description or CVs not provided')
+    if not jd_file or not files:
+        logger.error('Missing data: Job description file or CVs not provided')
         return jsonify({'error': 'Missing data'}), 400
 
     try:
-        selected_params = json.loads(selected_params)
+        job_description = extract_text_from_pdf(jd_file)   # JD as file
     except Exception as e:
-        logger.error(f"Invalid parameters: {e}")
-        return jsonify({'error': 'Invalid parameters'}), 400
+        logger.error(f"Error processing JD file: {e}")
+        return jsonify({'error': f"Error processing JD file: {str(e)}"}), 500
 
     results = []
 
@@ -311,20 +311,19 @@ def analyze_many_cvs():
 
 @application.route('/analyzeManyCvsTableWithParams', methods=['POST'])
 def analyze_many_cvs_table_with_params():
-    job_description = request.form.get('jobDescription')
+    jd_file = request.files.get('job_description')
     selected_params = request.form.get('selectedOptions')
-
     files = request.files.getlist('cvs')
 
-    if not job_description or not files:
-        logger.error('Missing data: Job description or CVs not provided')
+    if not jd_file or not files:
+        logger.error('Missing data: Job description file or CVs not provided')
         return jsonify({'error': 'Missing data'}), 400
 
     try:
-        selected_params = json.loads(selected_params)  
+        job_description = extract_text_from_pdf(jd_file)   # JD as file
     except Exception as e:
-        logger.error(f"Invalid parameters: {e}")
-        return jsonify({'error': 'Invalid parameters'}), 400
+        logger.error(f"Error processing JD file: {e}")
+        return jsonify({'error': f"Error processing JD file: {str(e)}"}), 500
 
     table_data = []
 
