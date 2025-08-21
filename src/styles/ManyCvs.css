@@ -64,11 +64,7 @@ input[type="file"] {
     border: 1px solid #facc15; 
 }
   
-textarea {
-    resize: none;
-    border: 1px solid #facc15;
-}
- 
+
 button {
     background-color: #f59e0b; 
     color: white;

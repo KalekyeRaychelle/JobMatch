@@ -156,14 +156,23 @@ const ManyCvs = () => {
   return (
     <div className="ManyCvs">
       <div className="jobCards">
-        <div className="description">
-          <label>Enter Job Description:</label>
-          <textarea
-            rows="7"
-            value={jobDescription}
-            onChange={handleDescriptionChange}
-          />
-        </div>
+        <div className='description'>
+      <label>Upload Job Description (PDF):</label>
+      <input 
+        type="file" 
+        accept=".pdf,.doc,.docx,.txt" 
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) {
+            setJobDescription(file);
+            localStorage.setItem('jobDescriptionFileName', file.name);
+          }
+        }} 
+      />
+      {localStorage.getItem('jobDescriptionFileName') && (
+        <p>Selected JD File: {localStorage.getItem('jobDescriptionFileName')}</p>
+      )}
+    </div>
         <div className="parameters">
           <label className="paraHeading">Choose parameters to filter the resumes based on:</label>
           <div className="checkbox-group">
