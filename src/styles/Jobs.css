@@ -45,10 +45,8 @@ input[type="file"]{
   background-color: #fff7e6;
   border: 1px solid #facc15; 
 }
-textarea {
-    resize:none;
-    border: 1px solid #facc15;
-}
+
+
 button {
     background-color: #f59e0b; 
     color: white;

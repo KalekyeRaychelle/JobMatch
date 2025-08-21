@@ -97,14 +97,24 @@ const Jobs = () => {
           {cvFileName && <p>Selected File: {cvFileName}</p>}
         </div>
 
-        <div className='description'>
-          <label>Enter Job Description:</label>
-          <textarea
-            rows="7"
-            value={jobDescription}
-            onChange={handleJobDescriptionChange}
-          />
-        </div>
+    <div className='description'>
+      <label>Upload Job Description (PDF):</label>
+      <input 
+        type="file" 
+        accept=".pdf,.doc,.docx,.txt" 
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) {
+            setJobDescription(file);
+            localStorage.setItem('jobDescriptionFileName', file.name);
+          }
+        }} 
+      />
+      {localStorage.getItem('jobDescriptionFileName') && (
+        <p>Selected JD File: {localStorage.getItem('jobDescriptionFileName')}</p>
+      )}
+    </div>
+
 
         <div className='btnSection'>
           <button onClick={handleAnalyzeClick}>Analyze</button>
