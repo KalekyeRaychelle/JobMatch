@@ -2,7 +2,7 @@
 
 An intelligent AI-powered system that analyzes CVs against job descriptions, identifies skill gaps, highlights matching qualifications, and recommends personalized learning resources for career development.
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Features](#features)
@@ -20,7 +20,7 @@ An intelligent AI-powered system that analyzes CVs against job descriptions, ide
 - [License](#license)
 - [Support](#support)
 
-## 🎯 Overview
+## Overview
 
 JobMatch is a platform that bridges the gap between job seekers and their target positions. By leveraging advanced AI and natural language processing, JobMatch analyzes your CV and compares it against job descriptions to provide:
 
@@ -66,7 +66,7 @@ Whether you're job hunting, planning a career transition, or upskilling for adva
   - Skill progression tracking
   - Resource quality ratings
 
-## 🛠 Technology Stack
+##  Technology Stack
 
 ### Backend
 - **Python** (87.2%) - Core AI/ML algorithms, data processing
