@@ -12,7 +12,7 @@ import requests
 import time
 
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key='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')
 
 application = Flask(__name__)
 CORS(application, origins=["https://jobmatch-fe.onrender.com"])
