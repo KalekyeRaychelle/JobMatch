@@ -217,7 +217,7 @@ Only respond with the JSON object. If a course URL is not available for a missin
         ]
 
         response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=messages,
             max_tokens=600,
             temperature=0.7
